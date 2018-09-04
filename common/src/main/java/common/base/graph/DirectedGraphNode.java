@@ -6,6 +6,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -14,11 +15,13 @@ import java.util.stream.Collectors;
  * @author zhaoju
  * @date 2018/9/3 22:47
  */
-@Getter
+
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 class DirectedGraphNode<N> {
     private Map<N, Object> nodeValue;
+    @Getter
     private int predecessorCount;
+    @Getter
     private int successorCount;
 
     private static final Object PRED = new Object();
@@ -39,7 +42,7 @@ class DirectedGraphNode<N> {
                 resultSet.add(node);
             }
         });
-        return resultSet;
+        return Collections.unmodifiableSet(resultSet);
     }
 
     /**
@@ -52,7 +55,7 @@ class DirectedGraphNode<N> {
                 .filter(entry -> isPredecessor(entry.getValue()))
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toSet());
-        return resultSet;
+        return Collections.unmodifiableSet(resultSet);
     }
 
     /**
@@ -93,6 +96,32 @@ class DirectedGraphNode<N> {
         } else if (previousValue != PRED) {
             nodeValue.put(node, new PredAndSucc(previousValue));
             ++predecessorCount;
+        }
+    }
+
+    public Presence removeSuccessor(N node) {
+        Object previousValue = nodeValue.get(node);
+        if (previousValue == null || previousValue == PRED) {
+            return null;
+        } else if (previousValue instanceof PredAndSucc) {
+            nodeValue.put(node, PRED);
+            --successorCount;
+            return (Presence) ((PredAndSucc) previousValue).successorValue;
+        } else {
+            nodeValue.remove(node);
+            --successorCount;
+            return (Presence) previousValue;
+        }
+    }
+
+    public void removePredecessor(N node) {
+        Object previousValue = nodeValue.get(node);
+        if (previousValue == PRED) {
+            nodeValue.remove(node);
+            --predecessorCount;
+        } else if (previousValue instanceof PredAndSucc) {
+            nodeValue.put(node, ((PredAndSucc) previousValue).successorValue);
+            --predecessorCount;
         }
     }
 

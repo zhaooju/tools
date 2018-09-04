@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -59,8 +60,45 @@ public class DirectedAcyclicGraph<N> implements Graph<N> {
         }
     }
 
+    public boolean removeNode(N node) {
+        Objects.requireNonNull(node, "node");
+
+        DirectedGraphNode<N> directedGraphNode = nodeMap.get(node);
+        if (directedGraphNode == null) {
+            return false;
+        }
+
+        for (N successor : directedGraphNode.successors()) {
+            nodeMap.get(successor).removePredecessor(node);
+        }
+
+        for (N predecessor : directedGraphNode.predecessors()) {
+            nodeMap.get(predecessor).removeSuccessor(node);
+            --edgeCount;
+        }
+        nodeMap.remove(node);
+        return true;
+    }
+
+    public DirectedGraphNode.Presence removeEdge(N nodeU, N nodeV) {
+        Objects.requireNonNull(nodeU, "nodeU");
+        Objects.requireNonNull(nodeV, "nodeV");
+
+        DirectedGraphNode<N> directedGraphNodeU = nodeMap.get(nodeU);
+        DirectedGraphNode<N> directedGraphNodeV = nodeMap.get(nodeV);
+        if (directedGraphNodeU == null || directedGraphNodeV == null) {
+            return null;
+        }
+        DirectedGraphNode.Presence previousValue = directedGraphNodeU.removeSuccessor(nodeV);
+        if (previousValue != null) {
+            directedGraphNodeV.removePredecessor(nodeU);
+            --edgeCount;
+        }
+        return previousValue;
+    }
+
     public Set<N> node() {
-        return nodeMap.keySet();
+        return Collections.unmodifiableSet(nodeMap.keySet());
     }
 
     private DirectedGraphNode<N> addNodeInternal(N node) {
