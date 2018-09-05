@@ -45,15 +45,18 @@ public class DirectedAcyclicGraph<N> implements Graph<N> {
     }
 
     @Override
-    public void putEdgeValue(N nodeU, N nodeV) {
+    public void putEdge(N nodeU, N nodeV) {
         Objects.requireNonNull(nodeU, "nodeU");
         Objects.requireNonNull(nodeV, "nodeV");
-        if (nodeU.equals(nodeV)) {
-            throw new IllegalStateException(String.format("不能生成自环图 node ==> %s", nodeU));
-        }
-        edges = null;
 
-        // TODO: 2018/9/4 使用dfs或bfs校验nodeV和nodeB之间是否为强连通的
+        if (containsNode(nodeU) && containsNode(nodeV) && GraphUtil.hasRoute(this, nodeV, nodeU)) {
+            throw new IllegalStateException(String.format("DAG 图不能成环 nodeU ==> %s, nodeV ==> %s", nodeU, nodeV));
+        }
+        addEdge(nodeU, nodeV);
+    }
+
+    void addEdge(N nodeU, N nodeV) {
+        edges = null;
         DirectedGraphNode.Presence value = EDGE_EXISTS;
         DirectedGraphNode<N> directedGraphNodeU = nodeMap.get(nodeU);
         if (directedGraphNodeU == null) {

@@ -134,6 +134,9 @@ class DirectedGraphNode<N> {
     }
 
     enum Presence {
+        /**
+         * 表示边存在
+         */
         EDGE_EXISTS
     }
 
