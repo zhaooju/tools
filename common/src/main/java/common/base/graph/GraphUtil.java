@@ -25,8 +25,8 @@ import static common.base.graph.GraphUtil.NodeVisitState.PENDING;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class GraphUtil {
 
-    private static final String NODE_NOT_IN_GRAPH = "Node %s is not an element of this graph.";
-    private static final String GRAPH_HAS_CYCLE = "Graph %s has cycle.";
+    static final String NODE_NOT_IN_GRAPH = "Node %s is not an element of this graph.";
+    static final String GRAPH_HAS_CYCLE = "Graph %s has cycle.";
 
     public static <N> Graph<N> copyOf(Graph<N> graph) {
         DirectedAcyclicGraph<N> copyGraph = DirectedAcyclicGraph.of();
@@ -81,6 +81,7 @@ public class GraphUtil {
      * @param <N>
      * @return
      */
+    // TODO: 2018/9/6 思考子图怎么获取
     public static <N> Graph<N> subGraph(Graph<N> graph, Iterable<N> nodes) {
         DirectedAcyclicGraph<N> subGraph = DirectedAcyclicGraph.of();
         if (isEmpty(graph) || nodes == null || !nodes.iterator().hasNext()) {
